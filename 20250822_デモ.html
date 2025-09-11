@@ -162,7 +162,7 @@
         .photo-preview img:hover { transform: scale(1.1); }
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(17, 24, 39, 0.6); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal-content { background-color: var(--color-surface); margin: 2rem auto; padding: 2.5rem; border-radius: var(--radius-lg); width: 90%; max-width: 700px; max-height: calc(100vh - 4rem); overflow-y: auto; box-shadow: var(--shadow-lg); animation: slideIn 0.3s ease-out; }
+        .modal-content { background-color: var(--color-surface); margin: 1rem auto; padding: 1rem; border-radius: var(--radius-lg); width: 95%; max-width: 750px; max-height: calc(100vh - 1rem); overflow-y: auto; box-shadow: var(--shadow-lg); animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         #equipmentModal .modal-content, #templateModal .modal-content, #equipmentTypeModal .modal-content, #itemSetModal .modal-content, #buildingModal .modal-content, #workOrderModal .modal-content, #datasetReferencePreviewModal .modal-content, #workOrderPreviewModal .modal-content, #resultDetailModal .modal-content, #inspectionHistoryModal .modal-content { max-width: 1200px; }
         #photoModal { z-index: 2100; }
@@ -173,8 +173,8 @@
         .modal-column .table-container { flex-grow: 1; }
         .modal-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
         .modal-filters .search-input, .modal-filters .form-select, .modal-filters .custom-datalist-container { width: 100%; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-border-light); }
-        .modal-title { font-size: 1.5rem; font-weight: 700; color: var(--color-text-primary); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.1rem; padding-bottom: 0.1rem; border-bottom: 1px solid var(--color-border-light); }
+        .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--color-text-primary); }
         .close { color: var(--color-text-secondary); font-size: 2rem; font-weight: bold; cursor: pointer; transition: color 0.2s; }
         .close:hover { color: var(--color-text-primary); }
         .option-input-group { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
@@ -251,7 +251,7 @@
             height: 60vh;
             min-height: 50px;
             max-height: 60vh;
-            overflow: auto;
+            overflow: hidden; 
             position: relative;
             background-color: var(--color-surface);
             border: 1px solid var(--color-border-light);
@@ -259,6 +259,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            resize: vertical;
         }
         #floor-plan-display-container canvas, #result-floor-plan-container canvas, #preview-floor-plan-container canvas {
             max-width: 100%;
@@ -330,6 +331,18 @@
         .custom-datalist-option:hover { background-color: var(--color-primary-light); color: var(--color-primary-text); }
         .custom-datalist-option.no-results { color: var(--color-text-secondary); cursor: default; }
         .custom-datalist-option:not(.no-results):hover { background-color: var(--color-primary-light); }
+        #modal-item-set-list-container .list-group-item {
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid var(--color-border-light);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #modal-item-set-list-container .list-group-item:last-child { border-bottom: none; }
+        #modal-item-set-list-container .list-group-item:hover { background-color: var(--color-bg); }
+        #modal-item-set-list-container .list-group-item label { display: flex; align-items: center; width: 100%; cursor: pointer; }
+        #modal-item-set-list-container .list-group-item input[type="radio"] { margin-right: 1rem; }
+        #modal-item-set-list-container .list-group-item .item-set-info { display: flex; flex-direction: column; }
+        #modal-item-set-list-container .list-group-item .item-set-info small { color: var(--color-text-secondary); }
 
         @media (max-width: 992px) { .modal-columns { grid-template-columns: 1fr; } }
         @media (max-width: 768px) { .sidebar { transform: translateX(-260px); } .sidebar.mobile-visible { transform: translateX(0); } .main-content { margin-left: 0; } .form-row, .modal-filters { grid-template-columns: 1fr; flex-direction: column; gap: 1rem; } .search-input { width: 100%; } .content { padding: 1rem; } .header { padding: 1rem; flex-wrap: wrap; } }
@@ -438,7 +451,7 @@
                         <div class="header-actions">
                             <button class="btn btn-primary" onclick="openBuildingModal()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>新規建物追加</button>
                         </div>
-                        <div class="table-container"><table class="table"><thead><tr><th class="sortable" onclick="handleSort('buildings', 'name')">建物名</th><th class="sortable" onclick="handleSort('buildings', 'address')">住所</th><th class="sortable" onclick="handleSort('buildings', 'floorName')">フロア</th><th>平面図</th><th>フロア設備</th><th class="sortable" onclick="handleSort('buildings', 'locationName')">管理拠点</th><th>操作</th></tr></thead><tbody id="buildingTableBody"></tbody></table></div>
+                        <div class="table-container"><table class="table"><thead><tr><th class="sortable" onclick="handleSort('buildings', 'name')">建物名</th><th class="sortable" onclick="handleSort('buildings', 'address')">住所</th><th>フロア</th><th>平面図</th><th>フロア設備</th><th class="sortable" onclick="handleSort('buildings', 'locationName')">管理拠点</th><th>操作</th></tr></thead><tbody id="buildingTableBody"></tbody></table></div>
                         <div class="pagination-container" id="pagination-bottom-buildings"></div>
                     </div>
                 </div>
@@ -604,7 +617,6 @@
                     </div>
                 </div>
 
-                <!-- 修正点1: 点検作業管理の参照ボタンで表示する新しい詳細プレビュー画面を追加 -->
                 <div id="work-order-preview-detail" class="page">
                     <div class="card">
                         <div class="header-actions">
@@ -689,9 +701,30 @@
                 <div class="form-group custom-datalist-container"><label class="form-label">設備種別</label><input type="text" id="modalTemplateTypeFilter" class="form-input" placeholder="種別名で検索..." oninput="filterCustomDatalist(this); handleTemplateModalFiltersChanged();" onfocus="showCustomDatalist(this, 'modalTemplateTypeFilter')" autocomplete="off"><div class="custom-datalist-options"></div></div>
             </div>
         </div>
-        <div class="modal-step"><h3 class="modal-step-title">2. データセット情報と対象設備を登録</h3><div class="form-group"><label class="form-label">データセット名</label><input type="text" class="form-input" id="templateName" required></div><div class="form-group"><label class="form-label">対象設備を選択 (同じ種別の設備のみ選択可)</label><div class="modal-filters" style="margin-top:0.5rem;"><input type="text" class="form-input search-input" id="modalEquipmentSearch" onkeyup="renderEquipmentCheckboxesTable()" placeholder="設備名..."></div><div class="table-container" id="equipmentCheckboxesTableContainer" style="max-height: 30vh;"></div></div></div>
-        <div class="modal-step"><h3 class="modal-step-title">3. 点検表を選択</h3><div class="form-group"><select id="templateItemSet" class="form-select" onchange="renderTemplatePreview()"></select></div></div>
-        <div id="templatePreviewStep" class="modal-step" style="display: none;"><h3 class="modal-step-title">4. プレビュー</h3>
+        <div class="modal-columns">
+            <div class="modal-column">
+                <div class="modal-step" style="border-bottom: none; padding-bottom: 0;">
+                    <h3 class="modal-step-title">2. データセット情報と対象設備を登録</h3>
+                    <div class="form-group"><label class="form-label">データセット名</label><input type="text" class="form-input" id="templateName" required></div>
+                    <div class="form-group"><label class="form-label">対象設備を選択 (同じ種別の設備のみ選択可)</label>
+                        <div class="modal-filters" style="margin-top:0.5rem;"><input type="text" class="form-input search-input" id="modalEquipmentSearch" onkeyup="renderEquipmentCheckboxesTable()" placeholder="設備名..."></div>
+                        <div class="table-container" id="equipmentCheckboxesTableContainer" style="max-height: 30vh;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-column">
+                 <div class="modal-step" style="border-bottom: none; padding-bottom: 0;">
+                    <h3 class="modal-step-title">3. 点検表を選択</h3>
+                     <div class="form-group">
+                        <input type="text" id="modalItemSetSearch" class="form-input" placeholder="点検表名で検索..." oninput="renderItemSetListForTemplateModal()">
+                    </div>
+                    <div id="modal-item-set-list-container" style="max-height: 38vh; overflow-y: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="templatePreviewStep" class="modal-step" style="display: none; margin-top: 1.5rem;">
+            <h3 class="modal-step-title">4. プレビュー</h3>
             <div id="templatePreviewContainer">
                 <div id="templatePreviewCommonItems"></div>
                 <div class="table-container" style="max-height: 40vh;">
@@ -742,7 +775,7 @@
                     <button class="btn btn-danger btn-sm" onclick="deleteSelectedShape()">選択図形を削除</button>
                 </div>
             </div>
-            <div class="modal-columns" style="flex-grow: 1; min-height: 0;">
+            <div class="modal-columns" style="flex-grow: 1; min-height: 0; grid-template-columns: 1fr 2fr;">
                 <div class="modal-column card" style="padding: 1rem; display: flex; flex-direction: column;">
                     <div id="selected-shape-info" class="selection-info-panel shape-info"></div>
                     <div id="selected-equipment-info" class="selection-info-panel equipment-info"></div>
@@ -778,7 +811,7 @@
             <h3 class="modal-title" id="mappingPreviewModalTitle">フロア設備参照</h3>
             <span class="close" onclick="closeAllModals()">×</span>
         </div>
-        <div class="modal-columns" style="flex-grow: 1; min-height: 0; margin-top: 1rem;">
+        <div class="modal-columns" style="flex-grow: 1; min-height: 0; margin-top: 1rem; grid-template-columns: 1fr 2fr;">
             <div class="modal-column card" style="padding: 1rem; display: flex; flex-direction: column;">
                 <div id="selected-shape-info-preview" class="selection-info-panel shape-info"></div>
                 <div id="selected-equipment-info-preview" class="selection-info-panel equipment-info"></div>
@@ -858,12 +891,12 @@
     <script>
         let data = { news: [], equipmentTypes: [], equipment: [], buildings: [], organizations: [], itemSets: [], templates: [], workOrders: [], workOrderResults: [] };
         let sortState = {};
-        const ITEMS_PER_PAGE = 50;
+        const ITEMS_PER_PAGE = 10;
         let currentPage = { news: 1, equipment: 1, buildings: 1, organizations: 1, itemSets: 1, templates: 1, workOrders: 1, workOrderSelection: 1, results: 1, datasetRef: 1 };
         let mappingCanvas, inspectionExecutionCanvas, resultDetailCanvas, resultDetailModalCanvas, previewExecutionCanvas;
+        let resizeObserver;
         let activeBuildingId, activeFloorName;
         let currentWorkOrderExecution = null;
-        // 修正点1: 新しいプレビュー用の状態変数を追加
         let currentWorkOrderPreview = null;
         let currentResultDetailState = { resultId: null, floorName: 'all', templateId: null, highlightEquipmentId: null };
         let shapeIdCounter = 1;
@@ -895,7 +928,6 @@
                 wrapper.classList.toggle('hidden');
                 btn.textContent = wrapper.classList.contains('hidden') ? '平面図を表示' : '平面図を非表示';
             });
-            // 修正点1: プレビュー画面の平面図表示/非表示ボタンにもイベントリスナーを追加
             document.getElementById('togglePreviewFloorPlanBtn').addEventListener('click', () => {
                 const wrapper = document.getElementById('preview-floor-plan-wrapper');
                 const btn = document.getElementById('togglePreviewFloorPlanBtn');
@@ -905,34 +937,58 @@
         }
 
         function loadSampleData() {
+            // Buildings
             data.buildings = [
                 { id: 1, name: '渋谷ヒカリエ', address: '東京都渋谷区渋谷2-21-1', locationName: '東京', floors: [{ name: '10F', photos: ['https://placehold.co/1200x800/e2e8f0/64748b?text=10F%20Floor%20Plan'], mappings: [{type: "rect", left: 100, top: 150, scaleX: 1, scaleY: 1, angle: 0, fill: "#ef4444", equipmentId: 1, width: 80, height: 60}] }, { name: '25F', photos: [], mappings: [] }, { name: '屋上', photos: ['https://placehold.co/1200x800/e2e8f0/64748b?text=Rooftop%20Floor%20Plan'], mappings: [{type: "circle", left: 300, top: 200, scaleX: 1, scaleY: 1, angle: 0, fill: "#f59e0b", equipmentId: 2, radius: 40}] }] },
                 { id: 2, name: '六本木ヒルズ森タワー', address: '東京都港区六本木6-10-1', locationName: '東京', floors: [{ name: 'B2F', photos: ['https://placehold.co/1200x800/e2e8f0/64748b?text=B2F%20Floor%20Plan'], mappings: [] }, { name: '49F', photos: [], mappings: [] }, { name: '50F', photos: [], mappings: [] }] },
                 { id: 3, name: 'グランフロント大阪', address: '大阪府大阪市北区大深町4-20', locationName: '大阪', floors: [{ name: '5F', photos: [], mappings: [] }, { name: 'B2F', photos: [], mappings: [] }] },
                 { id: 4, name: 'あべのハルカス', address: '大阪府大阪市阿倍野区阿倍野筋1-1-43', locationName: '大阪', floors: [{ name: '60F展望台', photos: [], mappings: [] }] },
-                { id: 5, name: 'JR博多シティ', address: '福岡県福岡市博多区博多駅中央街1-1', locationName: '福岡', floors: [{ name: '屋上', photos: [], mappings: [] }] }
+                { id: 5, name: 'JR博多シティ', address: '福岡県福岡市博多区博多駅中央街1-1', locationName: '福岡', floors: [{ name: '屋上', photos: [], mappings: [] }] },
+                { id: 6, name: '名古屋ミッドランドスクエア', address: '愛知県名古屋市中村区名駅4-7-1', locationName: '名古屋', floors: [] },
+                { id: 7, name: '札幌JRタワー', address: '北海道札幌市中央区北5条西2丁目', locationName: '札幌', floors: [] },
+                { id: 8, name: '横浜ランドマークタワー', address: '神奈川県横浜市西区みなとみらい2-2-1', locationName: '東京', floors: [] },
+                { id: 9, name: '神戸ポートタワー', address: '兵庫県神戸市中央区波止場町5-5', locationName: '大阪', floors: [] },
+                { id: 10, name: '福岡PayPayドーム', address: '福岡県福岡市中央区地行浜2-2-2', locationName: '福岡', floors: [] },
+                { id: 11, name: '東京スカイツリー', address: '東京都墨田区押上1-1-2', locationName: '東京', floors: [] },
+                { id: 12, name: '東京タワー', address: '東京都港区芝公園4-2-8', locationName: '東京', floors: [] },
             ];
+
+             // News
              data.news = [
                 { id: 1, date: '2025-08-05', title: 'システムリニューアルのお知らせ', content: '本日、設備点検管理システムをリニューアルしました。\nトップページおよびお知らせ機能が追加されています。' },
                 { id: 2, date: '2025-08-01', title: '夏季メンテナンス期間について', content: '8月13日から8月15日まではシステムメンテナンス期間となります。\nご迷惑をおかけしますが、ご理解のほどよろしくお願いいたします。' }
             ];
+             for (let i = 3; i <= 25; i++) {
+                data.news.push({ id: i, date: `2025-07-${String(31-i).padStart(2,'0')}`, title: `定期メンテナンス完了のお知らせ ${i-2}`, content: `No.${i-2}の定期システムメンテナンスが完了しました。ご協力いただきありがとうございました。`});
+            }
+
+            // Organizations
             data.organizations = [
                 { id: 1, company: '株式会社A&M', location: '東京', department: '第一ビル管理部', manager: '首都圏担当チーム' },
                 { id: 2, company: '株式会社A&M', location: '大阪', department: '関西ビル管理部', manager: '近畿担当チーム' },
                 { id: 3, company: '株式会社ビルメンテナンス西日本', location: '大阪', department: 'プロパティマネジメント課', manager: '大阪PMチーム' },
                 { id: 4, company: '株式会社ビルメンテナンス西日本', location: '福岡', department: '九州支社', manager: '福岡PMチーム' },
-                { id: 5, company: '東方設備サービス株式会社', location: '東京', department: '設備部', manager: '設備保守グループ' }
+                { id: 5, company: '東方設備サービス株式会社', location: '東京', department: '設備部', manager: '設備保守グループ' },
+                { id: 6, company: '株式会社A&M', location: '名古屋', department: '中部ビル管理部', manager: '東海担当チーム' },
+                { id: 7, company: '株式会社A&M', location: '札幌', department: '北海道ビル管理部', manager: '北海道担当チーム' },
+                { id: 8, company: '東方設備サービス株式会社', location: '大阪', department: '関西設備部', manager: '関西設備保守グループ' },
             ];
+            for (let i = 9; i <= 30; i++) {
+                const locations = ['東京','大阪','福岡','名古屋','札幌'];
+                const companies = ['株式会社A&M', '株式会社ビルメンテナンス西日本', '東方設備サービス株式会社', '首都圏ファシリティーズ'];
+                data.organizations.push({id: i, company: companies[i%4], location:locations[i%5], department: `第${i%3 + 1}事業部`, manager: `担当チーム${String.fromCharCode(65 + i%5)}`});
+            }
+
+
+             // Equipment Types
              data.equipmentTypes = [
-                { id: 1, group: '空調設備', type: 'パッケージエアコン' },
-                { id: 2, group: '空調設備', type: '冷却塔' },
-                { id: 3, group: '衛生設備', type: '給水ポンプ' },
-                { id: 4, group: '衛生設備', type: '排水槽' },
-                { id: 5, group: '電気設備', type: '受変電設備' },
-                { id: 6, group: '電気設備', type: '非常用発電機' },
-                { id: 7, group: '昇降機設備', type: 'エレベーター' },
-                { id: 8, group: '消防設備', type: '自動火災報知設備' },
+                { id: 1, group: '空調設備', type: 'パッケージエアコン' }, { id: 2, group: '空調設備', type: '冷却塔' },
+                { id: 3, group: '衛生設備', type: '給水ポンプ' }, { id: 4, group: '衛生設備', type: '排水槽' },
+                { id: 5, group: '電気設備', type: '受変電設備' }, { id: 6, group: '電気設備', type: '非常用発電機' },
+                { id: 7, group: '昇降機設備', type: 'エレベーター' }, { id: 8, group: '消防設備', type: '自動火災報知設備' },
             ];
+            
+            // Equipment
             data.equipment = [
                 { id: 1, name: '西側 空調機(PAC-01)', quantity: 1, typeId: 1, location: '機械室A', buildingId: 1, floorName: '10F' },
                 { id: 2, name: '冷却塔(CT-01)', quantity: 1, typeId: 2, location: '屋上機械室', buildingId: 1, floorName: '屋上' },
@@ -945,12 +1001,29 @@
                 { id: 9, name: '防災センター受信機', quantity: 1, typeId: 8, location: '防災センター', buildingId: 4, floorName: '' },
                 { id: 10, name: '非常用発電機', quantity: 1, typeId: 6, location: '屋上発電機室', buildingId: 5, floorName: '屋上' },
             ];
+            for (let i = 11; i <= 50; i++) {
+                const buildingId = (i % 12) + 1;
+                const building = data.buildings.find(b => b.id === buildingId);
+                const typeId = (i % 8) + 1;
+                const type = data.equipmentTypes.find(t => t.id === typeId);
+                data.equipment.push({ id: i, name: `${building.name.substring(0,2)}_${type.type.substring(0,3)}_${i}`, quantity: 1, typeId: typeId, location: `エリア${String.fromCharCode(65 + i%4)}-${i%10}`, buildingId: buildingId, floorName: '' });
+            }
+
+            // Item Sets
             data.itemSets = [
                 { id: 1, name: 'パッケージエアコン月次点検', typeId: 1, isStandard: true, items: [{ id: 101, name: 'フィルター状態確認', inputType: 'select', options: ['良好', '清掃要', '破損'], classification: '標準', cycle: '毎月', unit: '' }, { id: 102, name: 'ドレンパン汚れ確認', inputType: 'text', options: [], classification: '現場', cycle: '毎月', unit: '' }] },
                 { id: 2, name: '冷却塔定期点検', typeId: 2, isStandard: true, items: [{ id: 201, name: '循環水量確認', inputType: 'number', options: [], classification: '標準', cycle: '毎月', unit: 'm3/h' }, { id: 202, name: 'ファン異音確認', inputType: 'select', options: ['無し', '有り'], classification: '現場', cycle: '毎週', unit: '' }] },
                 { id: 3, name: '給水ポンプ定期点検', typeId: 3, isStandard: false, items: [{ id: 301, name: '運転圧力確認', inputType: 'number', options: [], classification: '標準', cycle: '毎日', unit: 'MPa' }, { id: 302, name: 'グランド部漏水確認', inputType: 'select', options: ['適量', '過多', '無し'], classification: '現場', cycle: '毎日', unit: '' }] },
                 { id: 8, name: '自火報受信機点検', typeId: 8, isStandard: true, items: [{ id: 801, name: '予備電源試験', inputType: 'select', options: ['正常', '異常'], classification: '標準', cycle: '半年', unit: '' }] }
             ];
+             for (let i = 4; i <= 20; i++) {
+                const typeId = (i % 8) + 1;
+                const typeInfo = data.equipmentTypes.find(t=> t.id === typeId);
+                data.itemSets.push({ id: i, name: `${typeInfo.type}法定点検`, typeId: typeId, isStandard: i%3==0, items: [{id: i*100+1, name: '外観目視確認', inputType: 'text', options: [], classification: '標準', cycle: '年次', unit: ''}] });
+            }
+
+
+            // Templates
             data.templates = [
                 { id: 1, name: '空調月次点検セット', buildingId: 1, locationName: '東京', equipmentIds: [1], itemSetId: 1 },
                 { id: 2, name: '冷却設備月次点検セット', buildingId: 1, locationName: '東京', equipmentIds: [2], itemSetId: 2 },
@@ -958,11 +1031,26 @@
                 { id: 4, name: '空調・電気重点点検', buildingId: 2, locationName: '東京', equipmentIds: [4, 5], itemSetId: 1 },
                 { id: 5, name: '防災設備半年点検', buildingId: 4, locationName: '大阪', equipmentIds: [9], itemSetId: 8 }
             ];
+            for (let i = 6; i <= 25; i++) {
+                const buildingId = (i % 12) + 1;
+                const building = data.buildings.find(b => b.id === buildingId);
+                data.templates.push({ id: i, name: `${building.name} 第${i%4+1}四半期点検`, buildingId: building.id, locationName: building.locationName, equipmentIds: [i+5], itemSetId: (i%4)+1 });
+            }
+
+            // WorkOrders
             data.workOrders = [
                 { id: 1, name: '月次A工事', buildingId: 1, locationName: '東京', templateIds: [1, 2], creationDate: '2025-08-01' },
                 { id: 2, name: '日常巡回点検B', buildingId: 2, locationName: '東京', templateIds: [3], creationDate: '2025-08-02' },
                 { id: 3, name: '防災設備法定点検', buildingId: 4, locationName: '大阪', templateIds: [5], creationDate: '2025-08-03' }
             ];
+            for (let i = 4; i <= 22; i++) {
+                 const buildingId = (i % 12) + 1;
+                 const building = data.buildings.find(b => b.id === buildingId);
+                 data.workOrders.push({ id: i, name: `${building.name} 2025年8月度定期点検`, buildingId: building.id, locationName: building.locationName, templateIds: [i-2], creationDate: `2025-07-${String(31-i).padStart(2,'0')}` });
+            }
+
+
+            // WorkOrderResults
             data.workOrderResults = [{
                 id: 1,
                 workOrderId: 1,
@@ -1306,7 +1394,6 @@
             `).join('');
         }
 
-
         function renderNewsManagementTable() {
             const sorted = sortData(data.news, sortState['news'] || { key: 'date', dir: 'desc' });
             renderPagination('news', sorted.length);
@@ -1414,67 +1501,37 @@
                 b.locationName.toLowerCase().includes(filters.location)
             );
 
-            const flatFloorData = filteredBuildings.flatMap(b =>
-                (b.floors && b.floors.length > 0)
-                ? b.floors.map(f => ({
-                    buildingId: b.id,
-                    name: b.name,
-                    address: b.address,
-                    locationName: b.locationName,
-                    floorName: f.name,
-                    floorPlan: f.photos && f.photos.length > 0 ? f.photos[0] : null
-                }))
-                : [{
-                    buildingId: b.id,
-                    name: b.name,
-                    address: b.address,
-                    locationName: b.locationName,
-                    floorName: '未設定',
-                    floorPlan: null
-                }]
-            );
-
-            const sorted = sortData(flatFloorData, sortState['buildings']);
+            const sorted = sortData(filteredBuildings, sortState['buildings']);
             renderPagination('buildings', sorted.length);
             const start = (currentPage.buildings - 1) * ITEMS_PER_PAGE;
             const paginated = sorted.slice(start, start + ITEMS_PER_PAGE);
 
-            const thead = document.querySelector('#building-management .table thead');
-            thead.innerHTML = `<tr>
-                <th class="sortable" onclick="handleSort('buildings', 'name')">建物名</th>
-                <th class="sortable" onclick="handleSort('buildings', 'address')">住所</th>
-                <th class="sortable" onclick="handleSort('buildings', 'floorName')">フロア</th>
-                <th>平面図</th>
-                <th>フロア設備</th>
-                <th class="sortable" onclick="handleSort('buildings', 'locationName')">管理拠点</th>
-                <th>操作</th>
-            </tr>`;
 
             const tbody = document.getElementById('buildingTableBody');
-            tbody.innerHTML = paginated.map(row => {
-                let floorPlanHtml = 'なし';
+            tbody.innerHTML = paginated.map(building => {
+                let floorHtml = '未設定';
+                let floorPlanHtml = '―';
                 let floorEquipmentButton = '―';
-
-                const building = data.buildings.find(b => b.id === row.buildingId);
-                const floor = building ? building.floors.find(f => f.name === row.floorName) : null;
-                
-                const hasFloorPlan = floor && floor.photos && floor.photos.length > 0;
-                
-                if (hasFloorPlan) {
-                    floorPlanHtml = `<img src="${row.floorPlan}" alt="平面図" class="table-thumbnail" onclick="openPhotoModal('${row.floorPlan}')">`;
-                    floorEquipmentButton = `<button class="btn btn-sm btn-secondary" onclick="openMappingPreviewModal(${row.buildingId}, '${row.floorName}')">参照</button>`;
+                 
+                if(building.floors && building.floors.length > 0) {
+                    floorHtml = building.floors.map(f => f.name).join(', ');
+                    const firstFloorWithPlan = building.floors.find(f => f.photos && f.photos.length > 0);
+                    if(firstFloorWithPlan) {
+                         floorPlanHtml = `<img src="${firstFloorWithPlan.photos[0]}" alt="平面図" class="table-thumbnail" onclick="openPhotoModal('${firstFloorWithPlan.photos[0]}')">`;
+                         floorEquipmentButton = `<button class="btn btn-sm btn-secondary" onclick="openMappingPreviewModal(${building.id}, '${firstFloorWithPlan.name}')">参照</button>`;
+                    }
                 }
 
                 return `<tr>
-                            <td>${row.name}</td>
-                            <td>${row.address}</td>
-                            <td>${row.floorName}</td>
+                            <td>${building.name}</td>
+                            <td>${building.address}</td>
+                            <td>${floorHtml}</td>
                             <td>${floorPlanHtml}</td>
                             <td>${floorEquipmentButton}</td>
-                            <td>${row.locationName}</td>
+                            <td>${building.locationName}</td>
                             <td>
-                                <button class="btn btn-sm btn-secondary" onclick="editBuilding(${row.buildingId})">編集</button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteItem('buildings', ${row.buildingId})">削除</button>
+                                <button class="btn btn-sm btn-secondary" onclick="editBuilding(${building.id})">編集</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteItem('buildings', ${building.id})">削除</button>
                             </td>
                         </tr>`;
             }).join('') || '<tr><td colspan="7" style="text-align:center; padding: 2rem;">データがありません。</td></tr>';
@@ -1775,8 +1832,6 @@
             saveItem('news', id, newsItem);
             closeAllModals();
         }
-
-
         function openPhotoModal(src) { document.getElementById('photoModalImage').src = src; openModal('photoModal'); }
         function closePhotoModal() { document.getElementById('photoModal').style.display = 'none'; }
         function openEquipmentModal() { 
@@ -1822,6 +1877,7 @@
             if (resultDetailCanvas) { resultDetailCanvas.dispose(); resultDetailCanvas = null; }
             if (resultDetailModalCanvas) { resultDetailModalCanvas.dispose(); resultDetailModalCanvas = null; }
             if (previewExecutionCanvas) { previewExecutionCanvas.dispose(); previewExecutionCanvas = null; }
+            if(resizeObserver) resizeObserver.disconnect();
         }
 
         function openRemarksModal(eqId, templateId) {
@@ -1934,7 +1990,14 @@
                 if (floorName) {
                     const img = row.querySelector('.photo-preview img');
                     const photos = img ? [img.src] : [];
-                    floors.push({ name: floorName, photos: photos });
+                    const existingBuilding = id ? data.buildings.find(b => b.id == id) : null;
+                    const existingFloor = existingBuilding ? existingBuilding.floors.find(f => f.name === floorName) : null;
+                    
+                    floors.push({ 
+                        name: floorName, 
+                        photos: photos,
+                        mappings: existingFloor ? existingFloor.mappings : [] 
+                    });
                 }
             });
 
@@ -1954,7 +2017,9 @@
             e.preventDefault();
             const id = document.getElementById('templateId').value;
             const eqIds = Array.from(document.querySelectorAll('#equipmentCheckboxesTableContainer input:checked')).map(cb => +cb.value);
-            const itemSetId = +document.getElementById('templateItemSet').value;
+            const itemSetRadio = document.querySelector('#modal-item-set-list-container input[name="templateItemSet"]:checked');
+            const itemSetId = itemSetRadio ? +itemSetRadio.value : null;
+
             const buildingInput = document.getElementById('modalTemplateBuildingFilter');
             const buildingId = buildingInput.dataset.selectedId;
             if (!buildingId) { alert('有効な建物が選択されていません。'); return; }
@@ -2073,7 +2138,8 @@
             renderEquipmentCheckboxesTable(t.equipmentIds);
             
             setTimeout(() => {
-                document.getElementById('templateItemSet').value = t.itemSetId;
+                const itemSetRadio = document.querySelector(`#modal-item-set-list-container input[value="${t.itemSetId}"]`);
+                if(itemSetRadio) itemSetRadio.checked = true;
                 renderTemplatePreview();
             }, 0);
         }
@@ -2163,12 +2229,12 @@
         
         function handleTemplateModalFiltersChanged() {
             renderEquipmentCheckboxesTable();
+            renderItemSetListForTemplateModal();
             renderTemplatePreview();
         }
 
         function renderEquipmentCheckboxesTable(checkedIds = []) {
             const cont = document.getElementById('equipmentCheckboxesTableContainer');
-            const itemSetSelect = document.getElementById('templateItemSet');
             const buildingInput = document.getElementById('modalTemplateBuildingFilter');
             const bId = buildingInput.dataset.selectedId ? +buildingInput.dataset.selectedId : null;
             
@@ -2178,7 +2244,6 @@
             
             if (!bId) {
                 cont.innerHTML = '<p style="text-align:center; padding: 2rem;">最初に建物を選択してください。</p>';
-                itemSetSelect.innerHTML = '<option value="">点検表を選択</option>';
                 return;
             }
 
@@ -2207,17 +2272,6 @@
             }).join('');
             html += '</tbody></table>';
             cont.innerHTML = html;
-
-            const checkedEqs = Array.from(document.querySelectorAll('#equipmentCheckboxesTableContainer input:checked')).map(cb => +cb.value);
-            if (checkedEqs.length > 0) {
-                 const firstCheckedTypeId = (data.equipment.find(e => e.id === checkedEqs[0]) || {}).typeId;
-                 updateTemplateItemSetSelect(firstCheckedTypeId);
-            } else if (typeFilter) {
-                const typeInfo = data.equipmentTypes.find(t => t.group === groupFilter && t.type === typeFilter);
-                if (typeInfo) updateTemplateItemSetSelect(typeInfo.id);
-            } else {
-                 updateTemplateItemSetSelect(null);
-            }
         }
 
         function handleEquipmentCheckboxChange(event) {
@@ -2226,44 +2280,65 @@
             
             if(checkedCheckboxes.length === 0) {
                 checkboxes.forEach(cb => cb.disabled = false);
-                const typeFilter = document.getElementById('modalTemplateTypeFilter').value;
-                if (typeFilter) {
-                     const groupFilter = document.getElementById('modalTemplateGroupFilter').value;
-                     const typeInfo = data.equipmentTypes.find(t => t.group === groupFilter && t.type === typeFilter);
-                     if (typeInfo) updateTemplateItemSetSelect(typeInfo.id);
-                } else {
-                    updateTemplateItemSetSelect(null);
-                }
-                renderTemplatePreview();
-                return;
-            }
-            
-            const firstCheckedId = checkedCheckboxes[0].value;
-            const firstTypeId = (data.equipment.find(e => e.id == firstCheckedId) || {}).typeId;
+            } else {
+                const firstCheckedId = checkedCheckboxes[0].value;
+                const firstTypeId = (data.equipment.find(e => e.id == firstCheckedId) || {}).typeId;
 
-            checkboxes.forEach(cb => {
-                const currentTypeId = (data.equipment.find(e => e.id == cb.value) || {}).typeId;
-                cb.disabled = currentTypeId !== firstTypeId;
-                if(cb.checked && cb.disabled) cb.checked = false;
-            });
-            updateTemplateItemSetSelect(firstTypeId);
+                checkboxes.forEach(cb => {
+                    const currentTypeId = (data.equipment.find(e => e.id == cb.value) || {}).typeId;
+                    cb.disabled = currentTypeId !== firstTypeId;
+                    if(cb.checked && cb.disabled) cb.checked = false;
+                });
+            }
+            renderItemSetListForTemplateModal();
             renderTemplatePreview();
         }
 
-        function updateTemplateItemSetSelect(typeId) {
-             const itemSetSelect = document.getElementById('templateItemSet');
-             const currentVal = itemSetSelect.value;
-             itemSetSelect.innerHTML = '<option value="">点検表を選択</option>';
-             if(typeId) {
-                 const availableItemSets = data.itemSets.filter(is => is.typeId === typeId);
-                 availableItemSets.forEach(is => {
-                     itemSetSelect.add(new Option(is.name, is.id));
-                 });
-                 if(availableItemSets.some(is => is.id == currentVal)) {
-                     itemSetSelect.value = currentVal;
+        function renderItemSetListForTemplateModal() {
+            const container = document.getElementById('modal-item-set-list-container');
+            const searchInput = document.getElementById('modalItemSetSearch').value.toLowerCase();
+            
+            const checkedEqs = Array.from(document.querySelectorAll('#equipmentCheckboxesTableContainer input:checked')).map(cb => +cb.value);
+            let targetTypeId = null;
+
+            if (checkedEqs.length > 0) {
+                targetTypeId = (data.equipment.find(e => e.id === checkedEqs[0]) || {}).typeId;
+            } else {
+                 const groupFilter = document.getElementById('modalTemplateGroupFilter').value;
+                 const typeFilter = document.getElementById('modalTemplateTypeFilter').value;
+                 if (typeFilter) {
+                    const typeInfo = data.equipmentTypes.find(t => t.group === groupFilter && t.type === typeFilter);
+                    if(typeInfo) targetTypeId = typeInfo.id;
                  }
-             }
+            }
+
+            if (!targetTypeId) {
+                container.innerHTML = '<div class="list-group-item" style="text-align: center;">対象設備を選択してください</div>';
+                return;
+            }
+
+            const availableItemSets = data.itemSets.filter(is => 
+                is.typeId === targetTypeId && is.name.toLowerCase().includes(searchInput)
+            );
+
+            if (availableItemSets.length === 0) {
+                 container.innerHTML = '<div class="list-group-item" style="text-align: center;">適合する点検表がありません</div>';
+                 return;
+            }
+
+            container.innerHTML = availableItemSets.map(is => `
+                <div class="list-group-item">
+                    <label>
+                        <input type="radio" name="templateItemSet" value="${is.id}" onchange="renderTemplatePreview()">
+                        <div class="item-set-info">
+                            <span>${is.name}</span>
+                            <small>${is.isStandard ? '標準' : '個別'} / ${is.items.length}項目</small>
+                        </div>
+                    </label>
+                </div>
+            `).join('');
         }
+
 
         function toggleAllCheckboxes(event, contId) { document.querySelectorAll(`#${contId} tbody input[type="checkbox"]`).forEach(cb => { if(!cb.disabled) cb.checked = event.target.checked; }); handleEquipmentCheckboxChange(); renderWorkOrderPreview(); }
         
@@ -2327,6 +2402,132 @@
              delete document.getElementById('modalTemplateTypeFilter').dataset.selectedId;
         }
 
+        // ★★★ ここからが修正の主要部分です ★★★
+
+        // ★修正1: 点検作業プレビュー機能の追加
+        function openWorkOrderPreviewDetail(workOrderId) {
+            const workOrder = data.workOrders.find(w => w.id === workOrderId);
+            if (!workOrder) { alert('点検作業が見つかりません。'); return; }
+
+            document.getElementById('pageTitle').textContent = `「${workOrder.name}」のプレビュー`;
+            currentWorkOrderPreview = {
+                workOrder: workOrder,
+                activeTemplateId: 'all',
+                activeFloorName: 'all'
+            };
+
+            const allEquipmentIds = [...new Set(workOrder.templateIds.flatMap(tid => (data.templates.find(t => t.id === tid) || {equipmentIds: []}).equipmentIds))];
+            const allFloors = [...new Set(
+                allEquipmentIds.map(eqId => {
+                    const eq = data.equipment.find(e => e.id === eqId);
+                    return (eq && eq.floorName && eq.floorName.trim() !== '') ? eq.floorName : 'フロア指定なし';
+                })
+            )].sort();
+            
+            const floorTabsContainer = document.getElementById('preview-floor-tabs-container');
+            let floorTabsHtml = `<div class="inspection-tab active" id="preview-floor-tab-all" onclick="switchPreviewActiveFloor('all')">すべて</div>`;
+            allFloors.forEach(floor => {
+                const floorId = floor.replace(/[^a-zA-Z0-9]/g, '-');
+                floorTabsHtml += `<div class="inspection-tab" id="preview-floor-tab-${floorId}" onclick="switchPreviewActiveFloor('${floor}')">${floor}</div>`;
+            });
+            floorTabsContainer.innerHTML = floorTabsHtml;
+
+            const tabsContainer = document.getElementById('preview-tabs');
+            let datasetTabsHtml = `<div class="inspection-tab active" id="preview-tab-all" onclick="switchPreviewActiveTemplate('all')">すべて</div>`;
+            workOrder.templateIds.forEach(templateId => {
+                const template = data.templates.find(t => t.id === templateId);
+                if (template) {
+                    datasetTabsHtml += `<div class="inspection-tab" id="preview-tab-${templateId}" onclick="switchPreviewActiveTemplate(${templateId})">${template.name}</div>`;
+                }
+            });
+            tabsContainer.innerHTML = datasetTabsHtml;
+
+            showPage('work-order-preview-detail');
+            switchPreviewActiveFloor('all');
+        }
+
+        function switchPreviewActiveFloor(floorName) {
+            if (!currentWorkOrderPreview) return;
+            currentWorkOrderPreview.activeFloorName = floorName;
+
+            document.querySelectorAll('#preview-floor-tabs-container .inspection-tab').forEach(tab => tab.classList.remove('active'));
+            const floorId = floorName === 'all' ? 'all' : floorName.replace(/[^a-zA-Z0-9]/g, '-');
+            const activeTab = document.getElementById(`preview-floor-tab-${floorId}`);
+            if(activeTab) activeTab.classList.add('active');
+            
+            const floorPlanWrapper = document.getElementById('preview-floor-plan-wrapper');
+            const toggleBtn = document.getElementById('togglePreviewFloorPlanBtn');
+            const canvasContainer = document.getElementById('preview-floor-plan-container');
+
+            canvasContainer.innerHTML = '<canvas id="previewExecutionCanvas"></canvas>'; 
+            
+            if (floorName !== 'all' && currentWorkOrderPreview.workOrder.buildingId) {
+                const building = data.buildings.find(b => b.id === currentWorkOrderPreview.workOrder.buildingId);
+                if (building) {
+                    const floor = building.floors.find(f => f.name === floorName);
+                    if (floor && floor.photos && floor.photos.length > 0) {
+                        floorPlanWrapper.classList.remove('hidden');
+                        toggleBtn.style.display = 'inline-flex';
+                        toggleBtn.textContent = '平面図を非表示';
+                        setTimeout(() => {
+                           if (previewExecutionCanvas) previewExecutionCanvas.dispose();
+                           previewExecutionCanvas = setupFloorPlanCanvas('previewExecutionCanvas', floor.photos[0], floor.mappings || [], true);
+                        }, 100);
+                    } else {
+                        floorPlanWrapper.classList.add('hidden');
+                        toggleBtn.style.display = 'none';
+                    }
+                }
+            } else {
+                floorPlanWrapper.classList.add('hidden');
+                toggleBtn.style.display = 'none';
+            }
+            
+            if (currentWorkOrderPreview.activeTemplateId) {
+                switchPreviewActiveTemplate(currentWorkOrderPreview.activeTemplateId);
+            }
+        }
+
+        function switchPreviewActiveTemplate(targetTemplateId) {
+            if(!currentWorkOrderPreview) return;
+            currentWorkOrderPreview.activeTemplateId = targetTemplateId;
+            document.querySelectorAll('#preview-tabs .inspection-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(`preview-tab-${targetTemplateId}`).classList.add('active');
+
+            const contentWrapper = document.getElementById('preview-content-wrapper');
+            contentWrapper.innerHTML = '';
+
+            const templatesToRender = targetTemplateId === 'all' 
+                ? currentWorkOrderPreview.workOrder.templateIds 
+                : [targetTemplateId];
+            
+            templatesToRender.forEach(templateId => {
+                const template = data.templates.find(t => t.id === templateId);
+                if (template) {
+                    const datasetWrapper = document.createElement('div');
+                    if (targetTemplateId === 'all') datasetWrapper.className = 'dataset-wrapper';
+
+                    const title = document.createElement('h3');
+                    title.className = 'dataset-title';
+                    title.textContent = template.name;
+                    datasetWrapper.appendChild(title);
+                    
+                    const commonContainer = document.createElement('div');
+                    const tableContainer = document.createElement('div');
+                    tableContainer.className = 'table-container';
+                    const table = document.createElement('table');
+                    table.className = 'table inspection-grid-table';
+                    tableContainer.appendChild(table);
+
+                    datasetWrapper.appendChild(commonContainer);
+                    datasetWrapper.appendChild(tableContainer);
+                    contentWrapper.appendChild(datasetWrapper);
+
+                    generateInspectionGrid(template, true, null, { commonContainer: commonContainer, table: table }, true);
+                }
+            });
+        }
+        
         function startWorkOrderInspection(workOrderId, resultId = null) {
             const workOrder = data.workOrders.find(w => w.id === workOrderId);
             if (!workOrder) { alert('点検作業が見つかりません。'); return; }
@@ -2725,8 +2926,7 @@
             body += '</tbody>';
             table.innerHTML = head + body;
         }
-
-        function saveWorkOrderInspection() {
+                function saveWorkOrderInspection() {
             if (!currentWorkOrderExecution) return;
             saveCurrentGridState(currentWorkOrderExecution.activeTemplateId);
             
@@ -2953,7 +3153,6 @@
             modalTitle.textContent = `「${equipmentName}」の点検履歴`;
             const contentDiv = document.getElementById('inspectionHistoryContent');
             
-            // 履歴モーダルの中身をクリアして再構築
             contentDiv.innerHTML = `
                 <div class="modal-filters">
                     <input type="text" id="historySearchInput" class="form-input" placeholder="点検作業名で検索...">
@@ -3050,7 +3249,9 @@
             const buildingInput = document.getElementById('modalTemplateBuildingFilter');
             const buildingId = buildingInput.dataset.selectedId;
             const equipmentIds = Array.from(document.querySelectorAll('#equipmentCheckboxesTableContainer input:checked')).map(cb => +cb.value);
-            const itemSetId = +document.getElementById('templateItemSet').value;
+            const itemSetRadio = document.querySelector('#modal-item-set-list-container input[name="templateItemSet"]:checked');
+            const itemSetId = itemSetRadio ? +itemSetRadio.value : null;
+
             const previewStep = document.getElementById('templatePreviewStep');
 
             if (!buildingId || equipmentIds.length === 0 || !itemSetId) {
@@ -3159,7 +3360,7 @@
                 </label>
                 <div class="photo-preview">${photosHtml}</div>
                 <button type="button" class="btn btn-sm btn-secondary mapping-btn" ${mappingButtonDisplay} 
-                        onclick="openMappingModal(document.getElementById('buildingId').value, this.closest('.floor-row').querySelector('.floor-name-input').value)">設備紐づけ</button>
+                        onclick="openMappingModal(document.getElementById('buildingId').value, this.closest('.floor-row').querySelector('.floor-name-input').value, this)">設備紐づけ</button>
                 <button type="button" class="btn btn-sm btn-danger btn-icon" onclick="this.closest('.floor-row').remove()" title="このフロアを削除" style="margin-left: auto;">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>
                 </button>
@@ -3188,40 +3389,74 @@
             reader.readAsDataURL(file);
         }
         
+        // ★修正3: 平面図のリサイズ処理を改善
         function setupFloorPlanResizer() {
             const handle = document.getElementById('resize-handle');
             const container = document.getElementById('floor-plan-display-container');
             let isResizing = false;
-            let lastDownY = 0;
 
-            handle.addEventListener('mousedown', function (e) {
+            // ★追加: ResizeObserverでコンテナサイズ変更を監視
+            const onResize = (entries) => {
+                 if(inspectionExecutionCanvas && entries[0]) { // inspectionExecutionCanvasが存在する場合のみ
+                    const { width, height } = entries[0].contentRect;
+                    inspectionExecutionCanvas.setWidth(width).setHeight(height);
+                    const bgImage = inspectionExecutionCanvas.backgroundImage;
+                    if(bgImage) {
+                         // 画像のアスペクト比を維持したスケールを再計算
+                         const scale = Math.min(width / bgImage.width, height / bgImage.height);
+                         bgImage.scale(scale);
+                         // 中央に配置
+                         bgImage.set({
+                            left: (width - bgImage.getScaledWidth()) / 2,
+                            top: (height - bgImage.getScaledHeight()) / 2,
+                        });
+                        
+                        // ★追加: 図形も追従させる
+                        const oldScale = inspectionExecutionCanvas.customScale || 1;
+                        inspectionExecutionCanvas.getObjects().forEach(obj => {
+                            obj.set({
+                                left: obj.left * (scale / oldScale),
+                                top: obj.top * (scale / oldScale),
+                                scaleX: obj.scaleX * (scale / oldScale),
+                                scaleY: obj.scaleY * (scale / oldScale),
+                            });
+                            obj.setCoords();
+                        });
+                        inspectionExecutionCanvas.customScale = scale;
+
+                        inspectionExecutionCanvas.renderAll();
+                    }
+                 }
+            };
+            resizeObserver = new ResizeObserver(onResize);
+            resizeObserver.observe(container);
+
+            handle.addEventListener('mousedown', (e) => {
                 isResizing = true;
-                lastDownY = e.clientY;
-                document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('mouseup', handleMouseUp);
-                document.body.style.userSelect = 'none';
-            });
+                document.body.style.userSelect = 'none'; // テキスト選択を防ぐ
+                const startY = e.clientY;
+                const startHeight = container.offsetHeight;
 
-            function handleMouseMove(e) {
-                if (!isResizing) return;
-                const deltaY = e.clientY - lastDownY;
-                const newHeight = container.offsetHeight + deltaY;
-                
-                const minHeight = parseInt(getComputedStyle(container).minHeight, 10);
-                const maxHeight = parseInt(getComputedStyle(container).maxHeight, 10);
-
-                if (newHeight >= minHeight && newHeight <= maxHeight) {
-                    container.style.height = `${newHeight}px`;
-                    lastDownY = e.clientY;
+                function onMouseMove(e) {
+                    if (!isResizing) return;
+                    const newHeight = startHeight + e.clientY - startY;
+                     const minHeight = parseInt(getComputedStyle(container).minHeight, 10);
+                     const maxHeight = parseInt(getComputedStyle(container).maxHeight, 10);
+                     if (newHeight >= minHeight && newHeight <= maxHeight) {
+                        container.style.height = `${newHeight}px`; // これでResizeObserverが発火する
+                     }
                 }
-            }
 
-            function handleMouseUp() {
-                isResizing = false;
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-                document.body.style.userSelect = 'auto';
-            }
+                function onMouseUp() {
+                    isResizing = false;
+                    document.body.style.userSelect = '';
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
         }
 
         function toggleFloorPlanDisplay() {
@@ -3332,25 +3567,40 @@
             });
         }
 
-        function openMappingModal(buildingId, floorName) {
+        function openMappingModal(buildingId, floorName, element) {
             activeBuildingId = buildingId;
             activeFloorName = floorName;
             shapeIdCounter = 1;
             selectedEquipmentId = null;
 
-            const building = data.buildings.find(b => b.id === +buildingId);
-            if (!building) { alert('建物データが見つかりませんでした。'); return; }
-            const floor = building.floors.find(f => f.name === floorName);
-            if (!floor || !floor.photos || floor.photos.length === 0) { alert('平面図の画像データが見つかりません。'); return; }
-            
-            const imageUrl = floor.photos[0];
+            const floorRow = element.closest('.floor-row');
+            const img = floorRow.querySelector('.photo-preview img');
 
-            document.getElementById('mappingModalTitle').textContent = `「${building.name} - ${floor.name}」の設備紐づけ`;
+            if (!img || !img.src) {
+                alert('平面図の画像データが見つかりません。');
+                return;
+            }
+            const imageUrl = img.src;
+
+            let buildingName = "新規建物";
+            let floorMappings = [];
+            if (buildingId) {
+                const building = data.buildings.find(b => b.id == buildingId);
+                if (building) {
+                    buildingName = building.name;
+                    const floor = building.floors.find(f => f.name === floorName);
+                    if (floor) {
+                        floorMappings = floor.mappings || [];
+                    }
+                }
+            }
+            
+            document.getElementById('mappingModalTitle').textContent = `「${buildingName} - ${floorName}」の設備紐づけ`;
             openModal('mappingModal');
 
             setTimeout(() => {
                 if (mappingCanvas) mappingCanvas.dispose();
-                mappingCanvas = setupFloorPlanCanvas('mappingCanvas', imageUrl, floor.mappings || []);
+                mappingCanvas = setupFloorPlanCanvas('mappingCanvas', imageUrl, floorMappings);
                 renderMappingEquipmentList(buildingId, false);
                 updateSelectedShapeInfo(null, false);
                 updateSelectedEquipmentInfo(null, false);
@@ -3367,11 +3617,20 @@
             const nameFilter = document.getElementById(isPreview ? 'mappingSearchNamePreview' : 'mappingSearchName').value.toLowerCase();
             const categoryFilter = document.getElementById(isPreview ? 'mappingSearchCategoryPreview' : 'mappingSearchCategory').value.toLowerCase();
             
-            const building = data.buildings.find(b => b.id === +buildingId);
-            const floor = building ? building.floors.find(f => f.name === activeFloorName) : null;
-            const linkedIdsInMappings = new Set(floor && floor.mappings ? floor.mappings.map(m => m.equipmentId) : []);
+            let linkedIdsInMappings = new Set();
+            if (buildingId) {
+                const building = data.buildings.find(b => b.id == buildingId);
+                const floor = building ? building.floors.find(f => f.name === activeFloorName) : null;
+                if(floor && floor.mappings) {
+                    linkedIdsInMappings = new Set(floor.mappings.map(m => m.equipmentId));
+                }
+            } else { 
+                if (mappingCanvas) {
+                    linkedIdsInMappings = new Set(mappingCanvas.getObjects().filter(o => o.equipmentId).map(o => o.equipmentId));
+                }
+            }
 
-            const equipmentInBuildingOrFloor = data.equipment.filter(eq => eq.buildingId === +buildingId && (eq.floorName === activeFloorName || eq.floorName === '' || !eq.floorName));
+            const equipmentInBuildingOrFloor = data.equipment.filter(eq => eq.buildingId == buildingId && (eq.floorName === activeFloorName || eq.floorName === '' || !eq.floorName));
             
             const filteredEquipment = equipmentInBuildingOrFloor.filter(eq => {
                 const typePath = getEquipmentTypePath(eq.typeId, ' ').toLowerCase();
@@ -3420,6 +3679,9 @@
                     evented: false,
                 });
                 canvasInstance.setBackgroundImage(img, canvasInstance.renderAll.bind(canvasInstance));
+                
+                // ★追加: リアルタイムリサイズのためにスケールを保存
+                canvasInstance.customScale = scale; 
 
                 loadShapesToCanvas(canvasInstance, mappings, isPreview, scale, img.left, img.top);
 
@@ -3541,6 +3803,7 @@
             }
         }
 
+        // ★修正2: 紐づけ/解除後のリスト更新を実装
         function linkEquipmentToShape() {
             const activeShape = mappingCanvas.getActiveObject();
             
@@ -3549,29 +3812,19 @@
                 return;
             }
             
-            const building = data.buildings.find(b => b.id === +activeBuildingId);
-            const floor = building.floors.find(f => f.name === activeFloorName);
-            if (floor && floor.mappings) {
-                floor.mappings.forEach(m => {
-                    if (m.equipmentId === selectedEquipmentId) {
-                        m.equipmentId = null;
-                    }
-                });
-            }
+            //他の図形に紐付いていたら、それを解除
+            mappingCanvas.getObjects().forEach(obj => {
+                if (obj.equipmentId === selectedEquipmentId) {
+                    delete obj.equipmentId;
+                    obj.set({ stroke: 'black', strokeWidth: 1 });
+                }
+            });
 
             activeShape.set('equipmentId', selectedEquipmentId);
             activeShape.set({ stroke: '#3b82f6', strokeWidth: 2 });
             
-            if (floor) {
-                if (!floor.mappings) floor.mappings = [];
-                const shapeData = { equipmentId: selectedEquipmentId }; 
-                const existingMapping = floor.mappings.find(m => m.equipmentId === selectedEquipmentId);
-                if (!existingMapping) {
-                }
-            }
-
+            saveMappingData(false); // ★追加: 内部データを更新
             mappingCanvas.renderAll();
-            saveMappingData(false); // サイレント保存
             renderMappingEquipmentList(activeBuildingId, false);
             updateSelectedShapeInfo(activeShape, false);
         }
@@ -3581,8 +3834,9 @@
             if (activeShape && activeShape.equipmentId) {
                 delete activeShape.equipmentId;
                 activeShape.set({ stroke: 'black', strokeWidth: 1 });
+                
+                saveMappingData(false); // ★追加: 内部データを更新
                 mappingCanvas.renderAll();
-                saveMappingData(false); // サイレント保存
                 renderMappingEquipmentList(activeBuildingId, false);
                 updateSelectedShapeInfo(activeShape, false);
             } else {
@@ -3620,8 +3874,12 @@
         }
 
         function saveMappingData(showAlert = true) {
-            const building = data.buildings.find(b => b.id === +activeBuildingId);
-            if (!building) return;
+            const building = data.buildings.find(b => b.id == activeBuildingId);
+            if (!building) {
+                if(showAlert) alert('建物の保存が完了していないため、紐づけ情報を保存できません。先に建物情報を保存してください。');
+                return;
+            };
+
             const floorIndex = building.floors.findIndex(f => f.name === activeFloorName);
             if (floorIndex === -1) return;
 
@@ -3679,7 +3937,7 @@
             if (!building) return;
             const floor = building.floors.find(f => f.name === floorName);
 
-            if (!floor || !floor.photos || !floor.photos.length === 0) {
+            if (!floor || !floor.photos || floor.photos.length === 0) {
                 alert('平面図の画像データが見つかりません。');
                 return;
             }
@@ -3795,7 +4053,7 @@
                     floorPlanWrapper.classList.remove('hidden');
                     toggleBtn.style.display = 'inline-flex';
                     setTimeout(() => {
-                        resultDetailModalCanvas = setupFloorPgit.lanCanvas('resultDetailModalCanvas', floor.photos[0], floor.mappings || [], true, highlightEquipmentId);
+                        resultDetailModalCanvas = setupFloorPlanCanvas('resultDetailModalCanvas', floor.photos[0], floor.mappings || [], true, highlightEquipmentId);
                     }, 100);
                 } else {
                     floorPlanWrapper.classList.add('hidden');
