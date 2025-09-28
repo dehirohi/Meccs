@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設備点検アプリ Ver. 3.2 (改修版)</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --surface-color: #ffffff;
+            --primary-color: #007bff;
+            --primary-hover-color: #0069d9;
+            --highlight-color: #cfe2ff;
+            --text-color-primary: #212529;
+            --text-color-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+
+        /* --- Base Styles --- */
+        *, *::before, *::after { box-sizing: border-box; }
+        html { height: 100%; }
+        body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color-primary);
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex; align-items: center; padding: 0 8px 0 16px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm); z-index: 10;
+            flex-shrink: 0;
+        }
+        .menu-btn {
+            background: none; border: none; color: var(--text-color-secondary);
+            padding: 12px; cursor: pointer; border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .menu-btn:hover { background-color: #e9ecef; }
+        .menu-btn svg { width: 24px; height: 24px; vertical-align: middle; }
+
+        header h1 { font-size: 1.15em; margin: 0; padding-left: 16px; font-weight: 600; }
+        .view-controls { margin-left: auto; display: flex; background-color: #e9ecef; border-radius: 8px; padding: 4px; }
+        .view-controls button {
+            background: none; border: none; color: var(--text-color-secondary);
+            padding: 6px 14px; margin: 0; border-radius: 6px; cursor: pointer;
+            font-weight: 500; font-size: 0.9em; transition: all 0.2s ease;
+        }
+        .view-controls button.active { background-color: var(--surface-color); color: var(--primary-color); box-shadow: var(--shadow-sm); }
+
+        /* --- Main Container & Splitter --- */
+        #main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .split { box-sizing: border-box; overflow: hidden; }
+        #drawing-area-container.full-height { height: 100% !important; }
+        #inspection-table-container.full-height { height: 100% !important; }
+        #drawing-area-container.hidden, #inspection-table-container.hidden { height: 0 !important; overflow: hidden; padding: 0; border: none; }
+        .gutter { background-color: #adb5bd; }
+        .gutter.gutter-vertical { height: 8px; cursor: row-resize; }
+        #main-container.no-split .gutter { height: 0px !important; }
+        
+        /* --- Drawing Area --- */
+        #drawing-area-container { display: flex; background-color: var(--bg-color); position: relative; }
+        #toolbar {
+            position: absolute; top: 0; left: 0; bottom: 0;
+            width: 250px; background-color: var(--surface-color);
+            border-right: 1px solid var(--border-color); box-shadow: var(--shadow-md);
+            transform: translateX(-100%); transition: transform 0.3s ease-in-out;
+            display: flex; flex-direction: column; z-index: 5;
+        }
+        #toolbar.open { transform: translateX(0); }
+        .toolbar-content { overflow-y: auto; padding: 16px; }
+        .tool-group { margin-bottom: 24px; }
+        .tool-group h3 {
+            font-size: 0.9em; margin: 0 0 10px 0; color: var(--text-color-primary);
+            font-weight: 600; padding-bottom: 4px; border-bottom: 1px solid var(--border-color);
+        }
+        .tool-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .tool-buttons button {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 4px; background-color: #f8f9fa; border: 1px solid var(--border-color);
+            color: var(--text-color-secondary); padding: 8px; border-radius: 4px; cursor: pointer;
+            transition: all 0.2s; font-size: 0.8em;
+        }
+        .tool-buttons button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .tool-buttons button svg { width: 24px; height: 24px; }
+        .tool-buttons button:not(:disabled):hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .tool-buttons button.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+        
+        .layer-controls { display: flex; flex-direction: column; gap: 8px; }
+        .layer-controls label { display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer; }
+        .layer-controls input { margin: 0; }
+
+        .brush-controls, .color-controls { display: flex; flex-direction: column; gap: 8px; }
+        .brush-controls label { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+        .brush-controls input[type="range"] { flex-grow: 1; }
+        .brush-controls span { width: 30px; text-align: right; }
+
+        .color-palette { display: flex; gap: 8px; flex-wrap: wrap; }
+        .color-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.1s; }
+        .color-btn.active { border-color: var(--primary-color); transform: scale(1.1); }
+        .color-picker-wrapper { display: flex; align-items: center; gap: 8px; }
+        .color-picker-wrapper input[type="color"] { width: 40px; height: 40px; border: none; padding: 0; cursor: pointer; background: none; }
+
+        #canvas-wrapper {
+            flex-grow: 1; display: flex; justify-content: center; align-items: center;
+            padding: 16px; margin-left: 0; transition: margin-left 0.3s ease-in-out;
+        }
+        #toolbar.open + #canvas-wrapper { margin-left: 250px; }
+        .canvas-container { background: #e9ecef; box-shadow: var(--shadow-md); border-radius: 4px; }
+
+        #tooltip {
+            position: absolute; background-color: rgba(33, 37, 41, 0.9); color: white;
+            padding: 8px 12px; border-radius: 4px; font-size: 0.9em; pointer-events: none;
+            display: none; z-index: 100; transition: opacity 0.2s; box-shadow: var(--shadow-md);
+            transform: translate(-50%, -110%);
+        }
+        
+        /* --- Inspection Table Area --- */
+        #inspection-table-container { display: flex; flex-direction: column; background: var(--surface-color); border-top: 1px solid var(--border-color); }
+        .table-controls { display: flex; border-bottom: 1px solid var(--border-color); padding: 0 16px; flex-wrap: wrap; align-items: center; flex-shrink: 0;}
+        .tabs { display: flex; }
+        .tabs:first-child { border-right: 1px solid var(--border-color); margin-right: 8px;}
+        .tabs button {
+            padding: 12px 16px; border: none; background: none; color: var(--text-color-secondary);
+            cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500; transition: all 0.2s;
+        }
+        .tabs button:hover { color: var(--text-color-primary); }
+        .tabs button.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+        
+        .table-wrapper { flex-grow: 1; overflow: auto; padding: 8px 16px; }
+        .table-wrapper h2 { font-size: 1.2rem; margin: 24px 0 12px 0; color: var(--text-color-primary); padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.9em; white-space: nowrap; }
+        thead { position: sticky; top: -8px; background-color: #f8f9fa; z-index: 1; }
+        th { color: var(--text-color-secondary); font-weight: 600; }
+        tbody tr { cursor: pointer; transition: background-color 0.2s; }
+        tbody tr:hover { background-color: #f1f3f5; }
+        tbody tr.highlighted { background-color: var(--highlight-color); }
+        
+        td select, td input[type="text"], td input[type="number"] {
+            width: 100%; background-color: #fff; color: var(--text-color-primary);
+            border: 1px solid #ced4da; border-radius: 4px; padding: 8px; box-sizing: border-box;
+            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+        td select:focus, td input:focus { border-color: var(--primary-color); outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
+        .photo-btn { background:none; border:none; cursor:pointer; padding:4px; opacity: 0.6; transition: opacity 0.2s;}
+        .photo-btn:hover { opacity: 1; }
+        .photo-btn svg { width:24px; height:24px; color: var(--primary-color); }
+        
+        /* --- Modal Styles --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background-color: white; border-radius: 8px; padding: 24px; width: 90%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: var(--shadow-md); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-header h2 { margin: 0; font-size: 1.5em; }
+        .modal-close-btn { background:none; border:none; font-size: 1.5em; cursor:pointer; color: var(--text-color-secondary); }
+        .modal-body { flex-grow: 1; overflow-y: auto; }
+        #photo-upload-area { border: 2px dashed var(--border-color); padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 16px; cursor: pointer; }
+        #photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+        .photo-thumbnail { position: relative; }
+        .photo-thumbnail img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; }
+        .delete-photo-btn { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; line-height: 24px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="menu-btn" id="toggle-toolbar" title="ツールバー表示/非表示">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z"/></svg>
+        </button>
+        <h1>設備点検アプリ</h1>
+        <div class="view-controls">
+            <button id="btn-show-all" class="active">両方</button>
+            <button id="btn-show-drawing">図面</button>
+            <button id="btn-show-table">点検表</button>
+        </div>
+    </header>
+
+    <main id="main-container">
+        <div id="drawing-area-container" class="split">
+            <div id="toolbar">
+                <div class="toolbar-content">
+                    <div class="tool-group">
+                        <h3>ツール</h3>
+                        <div class="tool-buttons">
+                            <button id="tool-select" title="選択"><svg viewBox="0 0 24 24"><path fill="currentColor" d="m13.5,21.9c-.4.2-.9.1-1.2-.2l-2.6-4.5l-4,1.8c-.5.2-1-.1-1.3-.5l-1.6-2.7c-.2-.5,0-1,.4-1.2l3.9-1.8l-3.9-1.8c-.4-.2-.6-.7-.4-1.2l1.6-2.7c.2-.5.8-.7,1.3-.5l4,1.8l2.6-4.5c.2-.4.7-.6,1.2-.4l3.2,1.6c.5.2.7.8.5,1.2l-2.2,4.5l4,1.8c.5.2.7.8.5,1.2l-1.6,2.7c-.2.5-.8.7-1.3-.5l-4-1.8l-2.6,4.5c-.2.4-.7.6-1.2.4Z"/></svg>選択</button>
+                            <button id="tool-pen" title="ペン"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z"/></svg>ペン</button>
+                            <button id="tool-eraser" title="消しゴム"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M16.24,3.56L20.44,7.76L8.28,20H4V15.72L16.24,3.56M17.66,2.14L14.1,5.7L18.3,9.9L21.86,6.34L17.66,2.14M4,22H22V20H4V22Z"/></svg>消しゴム</button>
+                            <button id="tool-rect" title="四角"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4,4H20V20H4V4M6,6V18H18V6H6Z"/></svg>四角</button>
+                            <button id="tool-circle" title="円"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20Z"/></svg>円</button>
+                            <button id="tool-line" title="直線"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M22,12L18,8V11H6V8L2,12L6,16V13H18V16L22,12Z" transform="rotate(45 12 12)"/></svg>直線</button>
+                        </div>
+                    </div>
+
+                    <div class="tool-group">
+                        <h3>履歴</h3>
+                        <div class="tool-buttons">
+                            <button id="undo-btn" title="戻す" disabled><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.5,8C9.81,8 7.5,9.35 6.47,11.33L2,6.97V17H12.03L7.67,12.53C8.53,10.68 10.37,9.33 12.5,9.33C15.9,9.33 18.78,11.93 18.78,15.17C18.78,18.42 15.9,21.02 12.5,21.02C9.53,21.02 7.05,18.91 6.38,16L2.94,17.43C3.96,21.03 7.93,24 12.5,24C19.16,24 24,18.66 24,12C24,5.34 19.16,0 12.5,0V8Z"/></svg>戻す</button>
+                            <button id="redo-btn" title="進む" disabled><svg viewBox="0 0 24 24"><path fill="currentColor" d="M11.5,8C14.19,8 16.5,9.35 17.53,11.33L22,6.97V17H11.97L16.33,12.53C15.47,10.68 13.63,9.33 11.5,9.33C8.1,9.33 5.22,11.93 5.22,15.17C5.22,18.42 8.1,21.02 11.5,21.02C14.47,21.02 16.95,18.91 17.62,16L21.06,17.43C20.04,21.03 16.07,24 11.5,24C4.84,24 0,18.66 0,12C0,5.34 4.84,0 11.5,0V8Z"/></svg>進む</button>
+                        </div>
+                    </div>
+
+                    <div class="tool-group">
+                        <h3>太さ</h3>
+                        <div class="brush-controls">
+                            <label>
+                                <input type="range" id="brush-width" min="1" max="30" value="5">
+                                <span id="brush-width-value">5px</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="tool-group">
+                        <h3>色</h3>
+                        <div class="color-controls">
+                            <div class="color-palette">
+                                <button class="color-btn" data-color="#007bff" style="background-color: #007bff;"></button>
+                                <button class="color-btn" data-color="#dc3545" style="background-color: #dc3545;"></button>
+                                <button class="color-btn" data-color="#28a745" style="background-color: #28a745;"></button>
+                                <button class="color-btn" data-color="#212529" style="background-color: #212529;"></button>
+                            </div>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="color-picker" value="#007bff">
+                                <span>カスタム</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tool-group">
+                        <h3>レイヤー</h3>
+                        <div class="layer-controls">
+                            <label><input type="checkbox" id="layer-drawing" data-layer="drawing" checked> お絵描き</label>
+                            <label><input type="checkbox" id="layer-plan" data-layer="plan" checked> 図面</label>
+                            <label><input type="checkbox" id="layer-marker" data-layer="marker" checked> マーカー</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="canvas-wrapper" class="canvas-container" style="flex:1; min-width:200px; min-height:200px;">
+                <canvas id="drawing-canvas"></canvas>
+            </div>
+            <div id="tooltip"></div>
+        </div>
+
+        <div id="inspection-table-container" class="split">
+            <div class="table-controls">
+                <div class="tabs" id="equipment-type-tabs"></div>
+                <div class="tabs" id="floor-tabs"></div>
+            </div>
+            <div class="table-wrapper" id="table-wrapper"></div>
+        </div>
+    </main>
+
+    <div id="photo-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">写真の管理</h2>
+                <button id="modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="photo-upload-area">
+                    <p>ここにファイルをドラッグ＆ドロップするか、クリックしてファイルを選択</p>
+                    <input type="file" id="photo-file-input" multiple accept="image/*" style="display: none;">
+                </div>
+                <div id="photo-grid"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DATA ---
+            const equipments = [
+                // 図面サイズ 2360x1640 を基準とした相対座標（0..1）
+                { id: 1, name: '照明-A01', floor: '1F', type: 'lighting', shape: 'circle', coords: { x: 0.15, y: 0.25 } },
+                { id: 2, name: '照明-A02', floor: '1F', type: 'lighting', shape: 'circle', coords: { x: 0.55, y: 0.25 } },
+                { id: 3, name: '空調-B01', floor: '1F', type: 'ac', shape: 'rect', coords: { x: 0.80, y: 0.40 } },
+                { id: 4, name: '分電盤-C01', floor: '1F', type: 'panel', shape: 'triangle', coords: { x: 0.15, y: 0.70 } },
+                { id: 5, name: '照明-A03', floor: '2F', type: 'lighting', shape: 'circle', coords: { x: 0.20, y: 0.30 } },
+                { id: 6, name: '空調-B02', floor: '2F', type: 'ac', shape: 'rect', coords: { x: 0.65, y: 0.45 } },
+            ];
+            const inspectionSchemas = {
+                lighting: { name: '照明器具', items: [ { key: 'appearance', label: '外観', type: 'select', options: ['良好', '汚損', '破損'] }, { key: 'lighting', label: '点灯状態', type: 'select', options: ['正常', '不点灯', 'ちらつき'] }, { key: 'voltage', label: '電圧(V)', type: 'number' }, ] },
+                ac: { name: '空調設備', items: [ { key: 'filter', label: 'フィルター', type: 'select', options: ['清掃済', '要清掃'] }, { key: 'temp', label: '吹出温度(°C)', type: 'number' }, { key: 'drain', label: 'ドレン', type: 'select', options: ['正常', '詰まり', '水漏れ'] }, ] },
+                panel: { name: '分電盤', items: [ { key: 'lock', label: '施錠', type: 'select', options: ['正常', '異常'] }, { key: 'voltage_r', label: 'R相電圧(V)', type: 'number' }, { key: 'voltage_s', label: 'S相電圧(V)', type: 'number' }, { key: 'temp', label: '盤内温度(°C)', type: 'number' }, ] }
+            };
+            const floorPlans = {
+                '1F': 'https://placehold.co/2360x1640/f0f0f0/999999?text=Floor+Plan+1F',
+                '2F': 'https://placehold.co/2360x1640/f0f0f0/999999?text=Floor+Plan+2F',
+            };
+            
+            // --- BASE / CONSTANTS ---
+            const BASE_PLAN_WIDTH = 2360;
+            const BASE_PLAN_HEIGHT = 1640;
+
+            // --- STATE ---
+            let canvas;
+            let currentTool = 'select', brushColor = '#007bff', brushWidth = 5;
+            let activeEquipmentType = 'all';
+            let activeFloor = [...new Set(equipments.map(e => e.floor))].sort()[0] || 'all';
+            let currentModalEquipmentId;
+            const photos = {};
+            const highlightColor = getComputedStyle(document.documentElement).getPropertyValue('--highlight-color').trim();
+
+            // drawing temp
+            let isDrawingShape = false, shapeBeingDrawn = null, origX = 0, origY = 0;
+
+            let undoStack = [];
+            let redoStack = [];
+            const MAX_HISTORY = 50;
+            let isProcessingHistory = false;
+
+            // --- CANVAS Initialization ---
+            function initCanvas() {
+                const canvasWrapper = document.getElementById('canvas-wrapper');
+                const canvasEl = document.getElementById('drawing-canvas');
+
+                // set canvas element size to wrapper inner size (device pixels)
+                function resizeCanvasElement() {
+                    const rect = canvasWrapper.getBoundingClientRect();
+                    canvasEl.width = Math.max(100, Math.floor(rect.width));
+                    canvasEl.height = Math.max(100, Math.floor(rect.height));
+                    canvasEl.style.width = rect.width + 'px';
+                    canvasEl.style.height = rect.height + 'px';
+                }
+                resizeCanvasElement();
+
+                canvas = new fabric.Canvas('drawing-canvas', { 
+                    preserveObjectStacking: true,
+                    selection: true,
+                    allowTouchScrolling: false,
+                    stopContextMenu: true,
+                    renderOnAddRemove: true,
+                });
+
+                // ensure canvas element sized to wrapper
+                new ResizeObserver(() => {
+                    const rect = canvasWrapper.getBoundingClientRect();
+                    canvas.setWidth(Math.max(100, Math.floor(rect.width)));
+                    canvas.setHeight(Math.max(100, Math.floor(rect.height)));
+                    fitCanvasToView();
+                    canvas.renderAll();
+                }).observe(canvasWrapper);
+
+                // canvas event hooks
+                canvas.on({
+                    'mouse:down': handleCanvasMouseDown,
+                    'mouse:move': handleCanvasMouseMove,
+                    'mouse:up': handleCanvasMouseUp,
+                    'selection:created': handleSelection,
+                    'selection:updated': handleSelection,
+                    'selection:cleared': handleSelection,
+                    'path:created': (e) => {
+                        if (e.path) {
+                            // フリーハンドパスの場合は座標変換を行わず、レイヤー情報のみ設定
+                            e.path.set({ layer: 'drawing' });
+                        }
+                    },
+                    'object:added': handleObjectChange,
+                    'object:modified': handleObjectChange,
+                    'object:removed': handleObjectChange,
+                });
+
+                // initial tool
+                canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+                updateBrush();
+
+                saveCanvasState();
+            }
+
+            /**
+             * 図面（背景画像）を含めてキャンバス全体を
+             * 常にBASE_PLANの全体が見えるように viewportTransform を設定する
+             */
+            function fitCanvasToView() {
+                if (!canvas) return;
+                const canvasWidth = canvas.getWidth();
+                const canvasHeight = canvas.getHeight();
+
+                // compute scale to fit BASE_PLAN into canvas
+                const scale = Math.min(canvasWidth / BASE_PLAN_WIDTH, canvasHeight / BASE_PLAN_HEIGHT) * 0.95; // 95%余白
+                const tx = (canvasWidth - BASE_PLAN_WIDTH * scale) / 2;
+                const ty = (canvasHeight - BASE_PLAN_HEIGHT * scale) / 2;
+
+                // set viewport transform: [scale, 0, 0, scale, tx, ty]
+                canvas.setViewportTransform([scale, 0, 0, scale, tx, ty]);
+
+                // update brush size according to new zoom
+                updateBrush();
+
+                canvas.renderAll();
+            }
+
+            /**
+             * 指定フロアの図面・マーカーをロードする（キャンバス上に直接オブジェクトとして追加）
+             * 重要: すべてBASE_PLAN座標系（2360x1640）に配置する
+             */
+            function updateCanvasForFloor(floor) {
+                // clear canvas but keep backgroundImage / objects from other floors removed
+                canvas.clear();
+                hideTooltip();
+                // reset background image and objects
+                if (floor === 'all') {
+                    canvas.renderAll();
+                    return;
+                }
+
+                if (!floorPlans[floor]) {
+                    canvas.renderAll();
+                    return;
+                }
+
+                // load floor plan image and set it as background image sized to BASE_PLAN_WIDTH x BASE_PLAN_HEIGHT
+                fabric.Image.fromURL(floorPlans[floor], (img) => {
+                    img.set({
+                        originX: 'left',
+                        originY: 'top',
+                        left: 0,
+                        top: 0,
+                        selectable: false,
+                        evented: false,
+                        hasControls: false,
+                    });
+                    // scale image so that its displayed size equals BASE_PLAN_WIDTH x BASE_PLAN_HEIGHT in base coordinate space
+                    const sx = BASE_PLAN_WIDTH / img.width;
+                    const sy = BASE_PLAN_HEIGHT / img.height;
+                    img.scaleX = sx;
+                    img.scaleY = sy;
+
+                    // set as backgroundImage. Using callback gives us access to image instance as backgroundImage
+                    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                        originX: 'left',
+                        originY: 'top',
+                        left: 0,
+                        top: 0,
+                    });
+
+                    // create markers for this floor (base coordinates)
+                    const objectsToAdd = [];
+                    equipments.forEach(eq => {
+                        if (eq.floor !== floor) return;
+                        const absoluteX = eq.coords.x * BASE_PLAN_WIDTH;
+                        const absoluteY = eq.coords.y * BASE_PLAN_HEIGHT;
+                        const baseSize = Math.min(BASE_PLAN_WIDTH, BASE_PLAN_HEIGHT) * 0.02; // marker size in base units
+
+                        let marker;
+                        const commonProps = {
+                            left: absoluteX,
+                            top: absoluteY,
+                            originX: 'center',
+                            originY: 'center',
+                            fill: '#ffffff',
+                            stroke: '#007bff',
+                            strokeWidth: Math.max(1, baseSize * 0.15),
+                            hasControls: false,
+                            hasBorders: false,
+                            selectable: true,
+                            evented: true,
+                            equipmentId: eq.id,
+                            layer: 'marker',
+                            floor: eq.floor,
+                        };
+
+                        switch(eq.shape) {
+                            case 'rect':
+                                marker = new fabric.Rect({ ...commonProps, width: baseSize, height: baseSize, angle: 45 });
+                                break;
+                            case 'triangle':
+                                marker = new fabric.Triangle({ ...commonProps, width: baseSize * 1.2, height: baseSize * 1.2 });
+                                break;
+                            default:
+                                marker = new fabric.Circle({ ...commonProps, radius: baseSize * 0.6 });
+                        }
+                        // pointer cursor and hover improvements
+                        marker.hoverCursor = 'pointer';
+                        objectsToAdd.push(marker);
+                    });
+
+                    // add markers to canvas
+                    objectsToAdd.forEach(o => canvas.add(o));
+
+                    // Ensure the view fits the base plan fully (zoom + center)
+                    fitCanvasToView();
+
+                    // apply initial layer visibility according to checkboxes
+                    toggleLayerVisibility('plan', document.getElementById('layer-plan').checked);
+                    toggleLayerVisibility('marker', document.getElementById('layer-marker').checked);
+                }, { crossOrigin: 'anonymous' });
+            }
+
+            function initUI() {
+                split = Split(['#drawing-area-container', '#inspection-table-container'], {
+                    sizes: [60, 40],
+                    direction: 'vertical',
+                    cursor: 'row-resize',
+                    gutterSize: 8,
+                    minSize: 0,
+                    onDragEnd: () => {
+                        const canvasWrapper = document.getElementById('canvas-wrapper');
+                        canvas.setDimensions({
+                            width: canvasWrapper.clientWidth,
+                            height: canvasWrapper.clientHeight
+                        });
+                        fitCanvasToView();
+                    }
+                });
+                
+                setTimeout(() => {
+                    updateCanvasForFloor(activeFloor);
+                    renderUI();
+                }, 100);
+            }
+
+            function renderUI() {
+                renderEquipmentTypeTabs();
+                renderFloorTabs();
+                renderTable();
+            }
+            
+            function renderEquipmentTypeTabs() {
+                const container = document.getElementById('equipment-type-tabs');
+                let tabsHtml = `<button class="tab-btn ${'all' === activeEquipmentType ? 'active' : ''}" data-type="all">すべて</button>`;
+                tabsHtml += Object.keys(inspectionSchemas).map(key =>
+                    `<button class="tab-btn ${key === activeEquipmentType ? 'active' : ''}" data-type="${key}">${inspectionSchemas[key].name}</button>`
+                ).join('');
+                container.innerHTML = tabsHtml;
+            }
+            
+            function renderFloorTabs() {
+                const container = document.getElementById('floor-tabs');
+                const floors = ['all', ...new Set(equipments.map(e => e.floor))].sort();
+                container.innerHTML = floors.map(f =>
+                    `<button class="tab-btn ${f === activeFloor ? 'active' : ''}" data-floor="${f}">${f.replace('all','すべてのフロア')}</button>`
+                ).join('');
+            }
+            
+            function renderTable() {
+                const tableWrapper = document.getElementById('table-wrapper');
+                tableWrapper.innerHTML = '';
+                const typesToRender = activeEquipmentType === 'all' ? Object.keys(inspectionSchemas) : [activeEquipmentType];
+                typesToRender.forEach(type => {
+                    const schema = inspectionSchemas[type];
+                    if (!schema) return;
+                    const filteredEquipments = equipments.filter(eq => eq.type === type && (activeFloor === 'all' || eq.floor === activeFloor));
+                    if (filteredEquipments.length === 0) return;
+                    if (activeEquipmentType === 'all') {
+                        const title = document.createElement('h2');
+                        title.textContent = schema.name;
+                        tableWrapper.appendChild(title);
+                    }
+                    const table = document.createElement('table');
+                    const thead = document.createElement('thead');
+                    const tbody = document.createElement('tbody');
+                    let headerHtml = '<tr><th>設備名</th><th>フロア</th>';
+                    schema.items.forEach(item => headerHtml += `<th>${item.label}</th>`);
+                    headerHtml += '<th>備考</th><th>写真</th></tr>';
+                    thead.innerHTML = headerHtml;
+                    filteredEquipments.forEach(eq => {
+                        const row = tbody.insertRow();
+                        row.dataset.equipmentId = eq.id;
+                        let rowHtml = `<td>${eq.name}</td><td>${eq.floor}</td>`;
+                        schema.items.forEach(item => {
+                            rowHtml += '<td>';
+                            if (item.type === 'select') {
+                                rowHtml += `<select>${item.options.map(o => `<option>${o}</option>`).join('')}</select>`;
+                            } else {
+                                rowHtml += `<input type="${item.type}" placeholder="---">`;
+                            }
+                            rowHtml += '</td>';
+                        });
+                        rowHtml += `<td><input type="text" placeholder="特記事項..."></td>`;
+                        rowHtml += `<td><button class="photo-btn" data-equipment-id="${eq.id}" title="写真管理"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" /></svg></button></td>`;
+                        row.innerHTML = rowHtml;
+                    });
+                    table.append(thead, tbody);
+                    tableWrapper.appendChild(table);
+                });
+            }
+
+            function resetAllMarkerStyles() {
+                if (!canvas) return;
+                canvas.getObjects().forEach(obj => {
+                    if (obj.layer === 'marker') {
+                        obj.set({
+                            fill: '#ffffff',
+                            scaleX: obj._baseScaleX || obj.scaleX || 1,
+                            scaleY: obj._baseScaleY || obj.scaleY || 1,
+                        });
+                    }
+                });
+                canvas.requestRenderAll();
+            }
+
+            function highlightTableRow(id) {
+                document.querySelectorAll('#table-wrapper tbody tr').forEach(row => {
+                    row.classList.toggle('highlighted', row.dataset.equipmentId == id);
+                });
+                if (id) {
+                    const targetRow = document.querySelector(`tr[data-equipment-id='${id}']`);
+                    if(targetRow) targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+            
+            function highlightMapMarker(id) {
+                const eq = equipments.find(e => e.id == id);
+                if (!eq) return;
+
+                if (eq.floor !== activeFloor) {
+                    activeFloor = eq.floor;
+                    renderUI();
+                    updateCanvasForFloor(activeFloor);
+                }
+                
+                setTimeout(() => {
+                    if (!canvas) return;
+                    canvas.discardActiveObject();
+                    const marker = canvas.getObjects().find(obj => obj.equipmentId == id && obj.layer === 'marker');
+                    if (marker) {
+                        canvas.setActiveObject(marker);
+                        // bring to front to emphasize
+                        marker.bringToFront();
+                    }
+                    canvas.requestRenderAll();
+                }, 200);
+            }
+            
+            function handleSelection(e) {
+                hideTooltip();
+                resetAllMarkerStyles();
+
+                const activeObj = canvas.getActiveObject();
+                if (!activeObj || activeObj.layer !== 'marker') {
+                    highlightTableRow(null);
+                    canvas.requestRenderAll();
+                    return;
+                }
+                
+                activeObj.set({
+                    fill: highlightColor
+                });
+                // 選択されたオブジェクトを少し拡大して目立たせる（基準スケールを保存して調整）
+                if (!activeObj._baseScaleX) {
+                    activeObj._baseScaleX = activeObj.scaleX || 1;
+                    activeObj._baseScaleY = activeObj.scaleY || 1;
+                }
+                const scaleUp = 1.3;
+                activeObj.scaleX = activeObj._baseScaleX * scaleUp;
+                activeObj.scaleY = activeObj._baseScaleY * scaleUp;
+                
+                showTooltip(activeObj);
+                highlightTableRow(activeObj.equipmentId);
+                canvas.requestRenderAll();
+            }
+            
+            function showTooltip(target) {
+                const tooltip = document.getElementById('tooltip');
+                const eq = equipments.find(e => e.id === target.equipmentId);
+                if (!eq || !canvas) return;
+
+                const canvasRect = canvas.getElement().getBoundingClientRect();
+                
+                // オブジェクト中心（base座標）を viewportTransform で画面（キャンバス内）座標に変換
+                const objectCenter = target.getCenterPoint(); // base coords
+                const transformedPoint = fabric.util.transformPoint(objectCenter, canvas.viewportTransform);
+
+                tooltip.style.left = `${canvasRect.left + transformedPoint.x}px`;
+                tooltip.style.top = `${canvasRect.top + transformedPoint.y}px`;
+                tooltip.innerHTML = `<strong>${eq.name}</strong><br>${eq.floor} / ${inspectionSchemas[eq.type].name}`;
+                tooltip.style.display = 'block';
+            }
+            
+            function hideTooltip() { document.getElementById('tooltip').style.display = 'none'; }
+            
+            function setupEventListeners() {
+                document.getElementById('btn-show-all').addEventListener('click', () => setView('all'));
+                document.getElementById('btn-show-drawing').addEventListener('click', () => setView('drawing'));
+                document.getElementById('btn-show-table').addEventListener('click', () => setView('table'));
+                document.getElementById('toggle-toolbar').addEventListener('click', () => document.getElementById('toolbar').classList.toggle('open'));
+                document.querySelector('.tool-buttons').addEventListener('click', e => {
+                    const btn = e.target.closest('button');
+                    if (btn && btn.id && btn.id.startsWith('tool-')) {
+                        setActiveTool(btn.id.replace('tool-', ''));
+                    }
+                });
+                document.getElementById('undo-btn').addEventListener('click', undo);
+                document.getElementById('redo-btn').addEventListener('click', redo);
+                const brushWidthInput = document.getElementById('brush-width');
+                const brushWidthValueSpan = document.getElementById('brush-width-value');
+                brushWidthInput.addEventListener('input', (e) => {
+                    brushWidth = parseInt(e.target.value, 10);
+                    brushWidthValueSpan.textContent = `${brushWidth}px`;
+                    updateBrush();
+                });
+                document.querySelector('.color-palette').addEventListener('click', e => {
+                    const btn = e.target.closest('.color-btn');
+                    if (btn) setBrushColor(btn.dataset.color);
+                });
+                document.getElementById('color-picker').addEventListener('input', (e) => setBrushColor(e.target.value));
+                document.querySelector('.layer-controls').addEventListener('change', e => {
+                    if (e.target.type === 'checkbox') toggleLayerVisibility(e.target.dataset.layer, e.target.checked);
+                });
+                document.getElementById('equipment-type-tabs').addEventListener('click', e => {
+                    if (e.target.tagName === 'BUTTON') {
+                        activeEquipmentType = e.target.dataset.type;
+                        renderUI();
+                    }
+                });
+                document.getElementById('floor-tabs').addEventListener('click', e => {
+                    if (e.target.tagName === 'BUTTON') {
+                        activeFloor = e.target.dataset.floor;
+                        renderUI();
+                        updateCanvasForFloor(activeFloor);
+                    }
+                });
+                document.getElementById('table-wrapper').addEventListener('click', e => {
+                    const row = e.target.closest('tr');
+                    const photoBtn = e.target.closest('.photo-btn');
+                    if (photoBtn) {
+                        e.stopPropagation();
+                        openPhotoModal(photoBtn.dataset.equipmentId);
+                    } else if (row) {
+                        highlightMapMarker(row.dataset.equipmentId);
+                    }
+                });
+                const modal = document.getElementById('photo-modal');
+                document.getElementById('modal-close').addEventListener('click', closePhotoModal);
+                modal.addEventListener('click', e => { if (e.target === modal) closePhotoModal(); });
+                const uploadArea = document.getElementById('photo-upload-area');
+                uploadArea.addEventListener('click', () => document.getElementById('photo-file-input').click());
+                uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
+                uploadArea.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); handlePhotoFiles(e.dataTransfer.files); });
+                document.getElementById('photo-file-input').addEventListener('change', (e) => handlePhotoFiles(e.target.files));
+                document.getElementById('photo-grid').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('delete-photo-btn')) {
+                        const index = parseInt(e.target.dataset.index, 10);
+                        photos[currentModalEquipmentId].splice(index, 1);
+                        renderPhotoGrid();
+                    }
+                });
+
+                // window resize should refit view
+                window.addEventListener('resize', () => {
+                    fitCanvasToView();
+                });
+            }
+            
+            function setView(view) {
+                const drawingPane = document.getElementById('drawing-area-container');
+                const tablePane = document.getElementById('inspection-table-container');
+                const main = document.getElementById('main-container');
+                document.querySelectorAll('.view-controls button').forEach(b => b.classList.remove('active'));
+                document.getElementById(`btn-show-${view}`).classList.add('active');
+                const isSplit = view === 'all';
+                main.classList.toggle('no-split', !isSplit);
+                drawingPane.classList.toggle('hidden', view === 'table');
+                tablePane.classList.toggle('hidden', view === 'drawing');
+                drawingPane.classList.toggle('full-height', view === 'drawing');
+                tablePane.classList.toggle('full-height', view === 'table');
+                
+                setTimeout(() => {
+                    if (view === 'all') {
+                        split.setSizes([60, 40]);
+                    } else if (view === 'drawing') {
+                        split.setSizes([100, 0]);
+                    } else if (view === 'table') {
+                        split.setSizes([0, 100]);
+                    }
+                    fitCanvasToView();
+                }, 100);
+            }
+            
+            function handleCanvasMouseDown(o) {
+                // if clicked on existing object, let fabric handle selection
+                if (o.target) return;
+
+                const evt = o.e;
+                const pointerViewport = canvas.getPointer(evt, true); // viewport coords
+                // convert to base coords
+                const inv = fabric.util.invertTransform(canvas.viewportTransform);
+                const pointerBase = fabric.util.transformPoint(pointerViewport, inv);
+
+                if (currentTool === 'eraser') return; // handled elsewhere via click event
+                if (['select', 'pen'].includes(currentTool)) return;
+
+                isDrawingShape = true;
+                origX = pointerBase.x;
+                origY = pointerBase.y;
+                
+                // stroke width in base units: adjust to base coordinate system
+                const strokeW = (brushWidth) / (canvas.getZoom ? canvas.getZoom() : canvas.viewportTransform[0]);
+                
+                const shapeProps = { 
+                    left: origX, top: origY, originX: 'left', originY: 'top', 
+                    width: 0, height: 0, fill: 'transparent', stroke: brushColor, strokeWidth: strokeW, selectable: true, evented: true, layer: 'drawing'
+                };
+
+                switch(currentTool) {
+                    case 'line':
+                        shapeBeingDrawn = new fabric.Line([origX, origY, origX, origY], { ...shapeProps, fill: brushColor, stroke: brushColor });
+                        break;
+                    case 'rect':
+                        shapeBeingDrawn = new fabric.Rect(shapeProps);
+                        break;
+                    case 'circle':
+                        shapeBeingDrawn = new fabric.Circle({ ...shapeProps, radius: 0 });
+                        break;
+                }
+                if (shapeBeingDrawn) {
+                    // Add in viewport? we add in base coords directly
+                    canvas.add(shapeBeingDrawn);
+                    // But fabric will interpret left/top as base coords then apply viewport transform when rendering
+                }
+            }
+            
+            function handleCanvasMouseMove(o) {
+                if (!isDrawingShape || !shapeBeingDrawn) return;
+                const evt = o.e;
+                const pointerViewport = canvas.getPointer(evt, true);
+                const inv = fabric.util.invertTransform(canvas.viewportTransform);
+                const pointerBase = fabric.util.transformPoint(pointerViewport, inv);
+
+                let left = origX, top = origY;
+                let width = pointerBase.x - origX;
+                let height = pointerBase.y - origY;
+
+                if (width < 0) {
+                    left = pointerBase.x;
+                    width = -width;
+                }
+                if (height < 0) {
+                    top = pointerBase.y;
+                    height = -height;
+                }
+                
+                switch(currentTool) {
+                    case 'line':
+                        shapeBeingDrawn.set({ x2: pointerBase.x, y2: pointerBase.y });
+                        break;
+                    case 'rect':
+                        shapeBeingDrawn.set({ left, top, width, height });
+                        break;
+                    case 'circle':
+                        const radius = Math.max(Math.abs(width), Math.abs(height)) / 2;
+                        shapeBeingDrawn.set({ left, top, radius: radius });
+                        break;
+                }
+                canvas.requestRenderAll();
+            }
+            
+            function handleCanvasMouseUp(o) {
+                if (isDrawingShape && shapeBeingDrawn) {
+                    // convert already in base coords – nothing further needed, but ensure it's layer 'drawing'
+                    shapeBeingDrawn.set({ layer: 'drawing' });
+                    shapeBeingDrawn = null;
+                }
+                isDrawingShape = false;
+                setActiveTool('select');
+            }
+
+            function setActiveTool(tool) {
+                document.querySelectorAll('.tool-buttons button[id^="tool-"]').forEach(b => b.classList.remove('active'));
+                const el = document.getElementById(`tool-${tool}`);
+                if (el) el.classList.add('active');
+                currentTool = tool;
+
+                canvas.isDrawingMode = (tool === 'pen');
+                canvas.selection = (tool === 'select');
+
+                if (tool === 'eraser') {
+                    // when eraser is active: click on marker/drawing objects to remove them
+                    canvas.off('mouse:down', handleCanvasMouseDown);
+                    canvas.on('mouse:down', handleEraserClick);
+                } else {
+                    canvas.off('mouse:down', handleEraserClick);
+                    canvas.on('mouse:down', handleCanvasMouseDown);
+                }
+                
+                updateBrush();
+            }
+            
+            function handleEraserClick(o) {
+                if (o.target && (o.target.layer === 'drawing' || o.target.layer === 'marker')) {
+                    canvas.remove(o.target);
+                    canvas.renderAll();
+                }
+            }
+
+            function setBrushColor(color) {
+                brushColor = color;
+                document.querySelectorAll('.color-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.color === color));
+                document.getElementById('color-picker').value = color;
+                updateBrush();
+            }
+
+            function updateBrush() {
+                if(canvas.isDrawingMode) {
+                    canvas.freeDrawingBrush.color = brushColor;
+                    // ブラシ太さはビューのズームに応じて補正（ベース単位を表示に合わせる）
+                    const scale = canvas.getZoom ? canvas.getZoom() : canvas.viewportTransform[0];
+                    canvas.freeDrawingBrush.width = Math.max(1, brushWidth / (scale || 1));
+                }
+            }
+
+            function toggleLayerVisibility(layerName, isVisible) {
+                if (!canvas) return;
+                canvas.getObjects().forEach(obj => {
+                    if (obj.layer === layerName || (layerName === 'plan' && obj === canvas.backgroundImage)) {
+                        if (layerName === 'plan' && canvas.backgroundImage) {
+                            canvas.backgroundImage.visible = isVisible;
+                        } else {
+                            obj.visible = isVisible;
+                        }
+                    }
+                });
+                canvas.requestRenderAll();
+            }
+
+            // 以下、Undo/Redo、写真モーダル関連の関数は最低限の形で残す（内容は必要に応じて拡張してください）
+            function handleObjectChange(e) {
+                // 単純に履歴保存（複雑な差分はここで作る）
+                if (!isProcessingHistory) saveCanvasState();
+            }
+            function saveCanvasState() {
+                try {
+                    // simple snapshot (JSON). Note: backgroundImage requires special handling – use canvas.toJSON
+                    const json = canvas.toJSON(['equipmentId', 'layer', 'floor', '_baseScaleX', '_baseScaleY']);
+                    undoStack.push(JSON.stringify(json));
+                    if (undoStack.length > MAX_HISTORY) undoStack.shift();
+                    redoStack = [];
+                    updateUndoRedoButtons();
+                } catch(e) { console.warn(e); }
+            }
+            function loadCanvasState(state) {
+                isProcessingHistory = true;
+                canvas.loadFromJSON(state, () => {
+                    // after loading, reapply background image reference if exists
+                    // fabric handles backgroundImage in JSON if serialized; so just renderAll
+                    canvas.renderAll();
+                    isProcessingHistory = false;
+                }, (o, object) => {
+                    // called for each object during load (can be used to restore prototypes)
+                });
+            }
+            function undo() {
+                if (undoStack.length <= 1) return;
+                const current = undoStack.pop();
+                redoStack.push(current);
+                const prev = undoStack[undoStack.length - 1];
+                if (prev) loadCanvasState(prev);
+                updateUndoRedoButtons();
+            }
+            function redo() {
+                if (redoStack.length === 0) return;
+                const state = redoStack.pop();
+                loadCanvasState(state);
+                undoStack.push(state);
+                updateUndoRedoButtons();
+            }
+            function updateUndoRedoButtons() {
+                document.getElementById('undo-btn').disabled = undoStack.length <= 1;
+                document.getElementById('redo-btn').disabled = redoStack.length === 0;
+            }
+            function openPhotoModal(id) {
+                currentModalEquipmentId = id;
+                const eq = equipments.find(e => e.id == id);
+                document.getElementById('modal-title').innerText = `${eq.name} の写真管理`;
+                renderPhotoGrid();
+                document.getElementById('photo-modal').style.display = 'flex';
+            }
+            function closePhotoModal() { document.getElementById('photo-modal').style.display = 'none'; }
+            function handlePhotoFiles(files) {
+                if (!currentModalEquipmentId) return;
+                if (!photos[currentModalEquipmentId]) photos[currentModalEquipmentId] = [];
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        photos[currentModalEquipmentId].push(e.target.result);
+                        renderPhotoGrid();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+            function renderPhotoGrid() {
+                const grid = document.getElementById('photo-grid');
+                grid.innerHTML = '';
+                (photos[currentModalEquipmentId] || []).forEach((dataUrl, index) => {
+                    grid.innerHTML += `
+                        <div class="photo-thumbnail">
+                            <img src="${dataUrl}" alt="Photo ${index + 1}">
+                            <button class="delete-photo-btn" data-index="${index}">&times;</button>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Initialize the application
+            initCanvas();
+            initUI();
+            setupEventListeners();
+            setBrushColor(brushColor);
+            document.getElementById('brush-width').value = brushWidth;
+            document.getElementById('brush-width-value').textContent = `${brushWidth}px`;
+            setActiveTool('select');
+        });
+    </script>
+
+</body>
+</html>
